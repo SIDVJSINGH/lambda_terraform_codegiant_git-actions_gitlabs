@@ -1,0 +1,25 @@
+# Crating a bucket and pushing code into bucket in a ZIP format
+
+# Bucket Creation
+resource "aws_s3_bucket" "terraform_lambda" {
+  bucket = "s3-bucket-for-lambda-function-using-terraform"
+  acl    = "private"
+  versioning {
+    enabled = true
+  }
+}
+
+# Zipping the Files
+data "archive_file" "python_zip" {
+  type          = "zip"
+  source_dir    = "${path.module}/python_files"
+  output_path   = "${path.module}/zip/python_files.zip"
+}
+
+# Pushing the ZIP to Bucket
+resource "aws_s3_bucket_object" "my_object" {
+  bucket = aws_s3_bucket.terraform_lambda.id
+  key    = "${path.module}/python_files.zip" 
+  source = data.archive_file.python_zip.output_path
+  acl    = "private"
+} 
